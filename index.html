@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#10152d"><title>صائد النجوم ⭐</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#26376c,#10152d 65%);color:#fff;font-family:Tahoma,Arial,sans-serif;display:grid;place-items:center;padding:18px}.app{width:min(100%,520px);text-align:center}.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.brand{font-size:clamp(22px,5vw,30px);font-weight:900}.pill{background:#ffffff18;border:1px solid #ffffff25;border-radius:14px;padding:9px 13px;font-size:14px}.panel{position:relative;overflow:hidden;border:1px solid #ffffff30;border-radius:24px;background:linear-gradient(#111a3b,#090e20);box-shadow:0 20px 60px #0007}.hud{display:flex;justify-content:space-around;padding:13px 8px;background:#ffffff0c;font-weight:bold}.hud span{color:#ffd76a}.stage{position:relative;height:min(62vh,570px);min-height:390px;touch-action:none;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,#25386a55,transparent 65%)}canvas{display:block;width:100%;height:100%}.overlay{position:absolute;inset:0;display:grid;place-items:center;background:#080d20bd;padding:25px}.overlay.hidden{display:none}.modal{max-width:330px}.modal h2{font-size:29px;margin:0 0 10px}.modal p{line-height:1.8;color:#d5defb}.btn{border:0;border-radius:14px;padding:13px 24px;background:linear-gradient(135deg,#ffdb70,#ff9e4a);color:#251735;font-weight:900;font-size:17px;cursor:pointer;box-shadow:0 6px 20px #ffb44a44}.controls{display:flex;justify-content:center;gap:22px;padding:13px}.move{width:72px;height:48px;border:1px solid #ffffff35;border-radius:14px;background:#ffffff12;color:white;font-size:22px;touch-action:none}.hint{color:#bac6e9;font-size:12px;margin:9px}
+</style></head>
+<body><main class="app">
+<div class="top"><div class="brand">⭐ صائد النجوم</div><div class="pill">لعبة مجانية</div></div>
+<section class="panel"><div class="hud"><div>النقاط: <span id="score">0</span></div><div>المحاولات: <span id="lives">3</span> ❤️</div><div>أفضل نتيجة: <span id="best">0</span></div></div>
+<div class="stage" id="stage"><canvas id="game"></canvas><div class="overlay" id="overlay"><div class="modal"><h2 id="headline">هل أنت مستعد؟ 🚀</h2><p id="message">حرّك المركبة والتقط النجوم والجواهر، وتجنب القنابل! كلما تقدمت زادت السرعة.</p><button class="btn" id="start">ابدأ اللعب</button></div></div></div>
+<div class="controls"><button class="move" id="right" aria-label="يمين">◀</button><button class="move" id="left" aria-label="يسار">▶</button></div></section>
+<div class="hint">استخدم الأسهم أو A و D، أو اسحب بإصبعك لتحريك المركبة.</div>
+</main>
+<script>
+(()=>{const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage');let w=0,h=0,player,items=[],score=0,lives=3,running=false,last=0,spawn=0,keys={},raf=0;
+const $=id=>document.getElementById(id);let best=Number(localStorage.getItem('star-catcher-best')||0);$('best').textContent=best;
+function resize(){const r=stage.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);w=r.width;h=r.height;canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);if(!player)player={x:w/2,y:h-48};player.x=Math.max(24,Math.min(w-24,player.x));draw()}new ResizeObserver(resize).observe(stage);
+function hud(){$('score').textContent=score;$('lives').textContent=lives;$('best').textContent=best}
+function spawnItem(){const roll=Math.random(),type=roll<.68?'star':roll<.84?'gem':'bomb';items.push({x:22+Math.random()*(w-44),y:-24,r:type==='gem'?11:13,type,vy:2.4+Math.random()*1.7+score/260})}
+function draw(){ctx.clearRect(0,0,w,h);for(let i=0;i<48;i++){let x=(i*97)%w,y=(i*137+performance.now()*.012)%h;ctx.fillStyle='#ffffff55';ctx.fillRect(x,y,2,2)}
+items.forEach(o=>{ctx.font=(o.type==='gem'?25:27)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(o.type==='star'?'⭐':o.type==='gem'?'💎':'💣',o.x,o.y)});
+ctx.font='38px Arial';ctx.textAlign='center';ctx.fillText('🚀',player.x,player.y)}
+function end(){running=false;cancelAnimationFrame(raf);if(score>best){best=score;localStorage.setItem('star-catcher-best',best)}hud();$('headline').textContent='انتهت اللعبة!';$('message').textContent='نتيجتك: '+score+' نقطة. أفضل نتيجة: '+best+'. هل تريد المحاولة مجدداً؟';$('start').textContent='العب مرة أخرى';$('overlay').classList.remove('hidden')}
+function frame(t){if(!running)return;let dt=Math.min((t-last)/16.67||1,2);last=t;spawn+=dt;if(spawn>Math.max(17,44-score/18)){spawn=0;spawnItem()}if(keys.left)player.x-=5.5*dt;if(keys.right)player.x+=5.5*dt;player.x=Math.max(24,Math.min(w-24,player.x));for(let i=items.length-1;i>=0;i--){let o=items[i];o.y+=o.vy*dt;if(Math.hypot(o.x-player.x,o.y-player.y)<27){if(o.type==='bomb'){lives--;if(lives<=0){items.splice(i,1);end();return}}else score+=o.type==='gem'?25:10;items.splice(i,1);hud()}else if(o.y>h+30)items.splice(i,1)}draw();raf=requestAnimationFrame(frame)}
+function start(){cancelAnimationFrame(raf);score=0;lives=3;items=[];spawn=0;player={x:w/2,y:h-48};hud();$('overlay').classList.add('hidden');running=true;last=performance.now();raf=requestAnimationFrame(frame)}
+$('start').addEventListener('click',start);window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','a','d','A','D'].includes(e.key)){e.preventDefault();keys.left=e.key==='ArrowLeft'||e.key.toLowerCase()==='a';keys.right=e.key==='ArrowRight'||e.key.toLowerCase()==='d'}});window.addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight','a','d','A','D'].includes(e.key)){keys.left=false;keys.right=false}});
+function hold(id,dir){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();keys[dir]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[dir]=false))}
+hold('left','right');hold('right','left');stage.addEventListener('pointermove',e=>{if(running&&e.pointerType==='touch'){const r=stage.getBoundingClientRect();player.x=e.clientX-r.left}});
+resize();hud();
+})();
+</script></body></html>
